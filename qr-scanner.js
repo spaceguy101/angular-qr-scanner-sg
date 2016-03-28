@@ -40,7 +40,7 @@
         video.setAttribute('width', width);
         video.setAttribute('height', height);
         video.setAttribute('autoplay', '');
-        video.setAttribute('style', '-moz-transform:rotateY(-180deg);-webkit-transform:rotateY(-180deg);transform:rotateY(-180deg);');
+      //  video.setAttribute('style', '-moz-transform:rotateY(-180deg);-webkit-transform:rotateY(-180deg);transform:rotateY(-180deg);');
         var canvas = $window.document.createElement('canvas');
         canvas.setAttribute('id', 'qr-canvas');
         canvas.setAttribute('width', width);
