@@ -1,0 +1,26 @@
+{
+  "name": "angular-qr-scanner-sp",
+  "version": "0.1.1",
+  "homepage": "https://github.com/spaceguy101/angular-qr-scanner",
+  "authors": [
+    "Shreyas P <shreyasponkshe12345@gmail.com>"
+  ],
+  "description": "QR scanner angular directive",
+  "main": "./qr-scanner.js",
+  "keywords": [
+    "angular",
+    "qr",
+    "qr scanner"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular": ">=1.2.0"
+  }
+}
