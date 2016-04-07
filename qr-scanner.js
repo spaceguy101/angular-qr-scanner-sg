@@ -14,23 +14,7 @@
         window.URL = window.URL || window.webkitURL || window.mozURL || window.msURL;
         navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
 
-        function gotSources(sourceInfos) {
-          for (var i = 0; i !== sourceInfos.length; ++i) {
-            var sourceInfo = sourceInfos[i];
-            if (sourceInfo.kind === 'video') {
-              var option = document.createElement('option');
-              option.value = sourceInfo.id;
-              option.text = sourceInfo.label || 'camera ' + (videoSelect.length + 1);
-              videoSelect.appendChild(option);
-            } else {
-              console.log('Some other kind of source: ', sourceInfo);
-            }
-          }
-        }
-
-
-        MediaStreamTrack.getSources(gotSources);
-
+        
 
         var height = attrs.height || 300;
         var width = attrs.width || 250;
@@ -46,12 +30,11 @@
         canvas.setAttribute('width', width);
         canvas.setAttribute('height', height);
         canvas.setAttribute('style', 'display:none;');
-        var videoSelect = $window.document.createElement('select');
-        videoSelect.setAttribute('id','videoSource');
+
 
         angular.element(element).append(video);
         angular.element(element).append(canvas);
-        angular.element(element).append(videoSelect);
+
         var context = canvas.getContext('2d');
         var stopScan;
 
@@ -61,7 +44,7 @@
             try {
               qrcode.decode();
             } catch(e) {
-             // scope.ngError({error: e});
+              scope.ngError({error: e});
             }
           }
         }
@@ -71,7 +54,7 @@
           $window.stream = stream;
           scope.video = video;
           video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
-          video.src = window.URL.createObjectURL(stream);
+        //  video.src = window.URL.createObjectURL(stream);
           video.play();
           stopScan = $interval(scan, 300);
         }
@@ -81,7 +64,7 @@
           scope.ngVideoError({error: error});
         }
 
-        function startVideo() {
+        function startVideo(videoSource) {
           if (window.stream) {
             video.src = null;
             //window.stream.stop();
@@ -89,23 +72,47 @@
               track.stop();
             });
           }
-          var videoSource = videoSelect.value;
-          var constraints = {
-            video: {
-              optional: [{
-                sourceId: videoSource
-              }]
-            }
-          };
+
+          if(videoSource){
+            var constraints = {
+              video: {
+                optional: [{
+                  sourceId: videoSource
+                }]
+              }
+            };
+          }else{
+            var constraints = {
+              video:true
+            };
+          }
+
           navigator.getUserMedia(constraints, successCallback, errorCallback);
         }
 
-        videoSelect.onchange = startVideo;
-        startVideo();
+         if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1)
+            startVideo();
+          else {
+            MediaStreamTrack.getSources(function (sources) {
+              var found_env_cam = false;
+              for (var i = 0; i < sources.length; i++) {
+                if (sources[i].kind == "video" && sources[i].facing == "environment") {
+                  var sourceId = sources[i].id;
+                  startVideo(sourceId);
+                  
+                  found_env_cam = true;
+                }
+              }
+
+              // If no specific environment camera is found (non-smartphone), user chooses
+              if (!found_env_cam) startVideo();
+            });
+          }
 
         qrcode.callback = function(data) {
           scope.ngSuccess({data: data});
         };
+
 
         element.bind('$destroy', function() {
 
@@ -115,13 +122,12 @@
               $window.localMediaStream.stop();
             } else if($window.localMediaStream.getVideoTracks) {
               var videoTracks = $window.localMediaStream.getVideoTracks();
-              if(videoTracks && videoTracks.length > 0) {
-                videoTracks[0].stop();
+              for(var i = 0 , len = videoTracks.length ; i<len ;i++ ){
+                videoTracks[i].stop();
               }
             }
         video.remove();
         canvas.remove();
-        videoSelect.remove;
 
         });
       }
