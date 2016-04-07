@@ -1,7 +1,7 @@
 (function() {
   'use strict';
 
-  angular.module('qrScanner', ["ng"]).directive('qrScanner', ['$interval', '$window', function($interval, $window) {
+  angular.module('qrScanner', ["ng"]).directive('qrScanner', ['$timeout','$interval', '$window', function($timeout,$interval, $window) {
     return {
       restrict: 'E',
       scope: {
@@ -47,6 +47,7 @@
               scope.ngError({error: e});
             }
           }
+           stopScan = $timeout(scan);
         }
 
         var successCallback = function(stream) {
@@ -56,7 +57,8 @@
           video.src = (window.URL && window.URL.createObjectURL(stream)) || stream;
         //  video.src = window.URL.createObjectURL(stream);
           video.play();
-          stopScan = $interval(scan, 300);
+          //stopScan = $interval(scan, 10);
+          scan();
         }
 
 
@@ -116,7 +118,7 @@
 
         element.bind('$destroy', function() {
 
-              $interval.cancel(stopScan);
+             $timeout.cancel(stopScan);
             
             if ($window.localMediaStream.stop) {
               $window.localMediaStream.stop();
